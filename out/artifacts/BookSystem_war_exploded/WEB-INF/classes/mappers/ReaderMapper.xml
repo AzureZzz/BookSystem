@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.ReaderMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.Reader">
+    <id column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="name" jdbcType="NVARCHAR" property="name" />
+    <result column="type" jdbcType="TINYINT" property="type" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="balance" jdbcType="DOUBLE" property="balance" />
+    <result column="sign_time" jdbcType="TIMESTAMP" property="signTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    username, password, name, type, email, balance, sign_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from reader
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectLogin" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from reader
+    where username = #{username,jdbcType=VARCHAR}
+    and password = #{password}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from reader
+  </select>
+
+  <select id="selectReaders" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from reader
+    where ${column} not in (
+    select top ${offest} ${column}
+    from reader
+    )
+    and (username like '%${keyWord}%'
+    or email like '%${keyWord}%'
+    or name like '%${keyWord}%'
+    or balance like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectAllCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from reader
+  </select>
+
+  <select id="selectCountDate"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from reader
+    where sign_time between convert(char(10),#{startDate,jdbcType=TIMESTAMP},120)
+    and convert(char(10),#{endDate,jdbcType=TIMESTAMP},120)
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from reader
+    where username = #{username,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.guet.entity.Reader">
+    insert into reader (username, password, name, 
+      type, email, balance,sign_time
+      )
+    values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{name,jdbcType=NVARCHAR}, 
+      #{type,jdbcType=TINYINT}, #{email,jdbcType=VARCHAR}, #{balance,jdbcType=DOUBLE},
+      #{signTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.Reader">
+    insert into reader
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        username,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="balance != null">
+        balance,
+      </if>
+      <if test="sign_time != null">
+        sign_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=NVARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="balance != null">
+        #{balance,jdbcType=DOUBLE},
+      </if>
+      <if test="signTime != null">
+        #{signTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.guet.entity.Reader">
+    update reader
+    <set>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=NVARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="balance != null">
+        balance = #{balance,jdbcType=DOUBLE},
+      </if>
+      <if test="signTime != null">
+        sign_time =  #{signTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where username = #{username,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.guet.entity.Reader">
+    update reader
+    set password = #{password,jdbcType=VARCHAR},
+      name = #{name,jdbcType=NVARCHAR},
+      type = #{type,jdbcType=TINYINT},
+      email = #{email,jdbcType=VARCHAR},
+      balance = #{balance,jdbcType=DOUBLE},
+      sign_time =  #{signTime,jdbcType=TIMESTAMP}
+    where username = #{username,jdbcType=VARCHAR}
+  </update>
+</mapper>

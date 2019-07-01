@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.AdminMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.Admin">
+    <id column="admin" jdbcType="VARCHAR" property="admin" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="contact" jdbcType="VARCHAR" property="contact" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    admin, password, contact
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from admin
+    where admin = #{admin,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectLogin"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from admin
+    where admin = #{admin}
+    and password = #{password}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from admin
+    where admin = #{admin,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.guet.entity.Admin">
+    insert into admin (admin, password, contact
+      )
+    values (#{admin,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{contact,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.Admin">
+    insert into admin
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="admin != null">
+        admin,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="contact != null">
+        contact,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="admin != null">
+        #{admin,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="contact != null">
+        #{contact,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.guet.entity.Admin">
+    update admin
+    <set>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="contact != null">
+        contact = #{contact,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where admin = #{admin,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.guet.entity.Admin">
+    update admin
+    set password = #{password,jdbcType=VARCHAR},
+      contact = #{contact,jdbcType=VARCHAR}
+    where admin = #{admin,jdbcType=VARCHAR}
+  </update>
+</mapper>

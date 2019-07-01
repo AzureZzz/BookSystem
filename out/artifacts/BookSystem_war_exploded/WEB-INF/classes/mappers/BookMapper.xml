@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.BookMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.Book">
+    <id column="book_no" jdbcType="VARCHAR" property="bookNo" />
+    <result column="call_num" jdbcType="VARCHAR" property="callNum" />
+    <result column="place" jdbcType="NVARCHAR" property="place" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    book_no, call_num, place, state
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from book
+    where book_no = #{bookNo,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAllBooks" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from book
+    where ${column} not in (
+    select top ${offest} ${column}
+    from book
+    )
+    and (book_no like '%${keyWord}%'
+    or call_num like '%${keyWord}%'
+    or place like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectBooks" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from book
+    where ${column} not in (
+    select top ${offest} ${column}
+    from book
+    )
+    and call_num =  #{callNum,jdbcType=VARCHAR}
+    and (book_no like '%${keyWord}%'
+    or place like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectAllCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from book
+  </select>
+
+  <select id="getCountBook" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select
+    count(*)
+    from book
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getCountBookState"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from book
+    where call_num = #{callNum,jdbcType=VARCHAR}
+    and state = #{state}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from book
+    where book_no = #{bookNo,jdbcType=VARCHAR}
+  </delete>
+
+  <delete id="deleteByCallNum" parameterType="java.lang.String">
+    delete from book
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.guet.entity.Book">
+    insert into book (book_no, call_num, place, 
+      state)
+    values (#{bookNo,jdbcType=VARCHAR}, #{callNum,jdbcType=VARCHAR}, #{place,jdbcType=NVARCHAR}, 
+      #{state,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.Book">
+    insert into book
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="bookNo != null">
+        book_no,
+      </if>
+      <if test="callNum != null">
+        call_num,
+      </if>
+      <if test="place != null">
+        place,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="bookNo != null">
+        #{bookNo,jdbcType=VARCHAR},
+      </if>
+      <if test="callNum != null">
+        #{callNum,jdbcType=VARCHAR},
+      </if>
+      <if test="place != null">
+        #{place,jdbcType=NVARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+
+
+  <update id="resetState" parameterType="java.lang.String">
+    update book
+    set state = 0
+    where book_no in (
+      select b.book_no
+      from book b join borrow b2 on b.book_no = b2.book_no
+      where b2.username = #{username}
+    )
+  </update>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.guet.entity.Book">
+    update book
+    <set>
+      <if test="callNum != null">
+        call_num = #{callNum,jdbcType=VARCHAR},
+      </if>
+      <if test="place != null">
+        place = #{place,jdbcType=NVARCHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=TINYINT},
+      </if>
+    </set>
+    where book_no = #{bookNo,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.guet.entity.Book">
+    update book
+    set call_num = #{callNum,jdbcType=VARCHAR},
+      place = #{place,jdbcType=NVARCHAR},
+      state = #{state,jdbcType=TINYINT}
+    where book_no = #{bookNo,jdbcType=VARCHAR}
+  </update>
+</mapper>

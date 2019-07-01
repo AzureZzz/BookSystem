@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<context:property-placeholder location="classpath:config.properties" />
+	<!-- 自动扫描注解的bean -->
+	<context:component-scan base-package="com.guet.*" />
+	<!--<context:component-scan base-package="com.guet*">-->
+		<!--扫描时跳过 @Controller 注解的JAVA类（控制器）-->
+		<!--<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />-->
+	<!--</context:component-scan>-->
+
+	<!--配置数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${jdbc.driver}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="maxPoolSize" value="${maxPoolSize}" />
+		<property name="minPoolSize" value="${minPoolSize}" />
+		<property name="initialPoolSize" value="${initialPoolSize}" />
+		<property name="maxIdleTime" value="${maxIdleTime}" />
+	</bean>
+
+	<!-- 配置Mybatis -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath*:mappers/**/*.xml" />
+	</bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.guet.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+
+	<!-- 事物管理器配置 -->
+	<bean id="manager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 使用annotation注解方式配置事务 -->
+	<tx:annotation-driven transaction-manager="manager"/>
+
+	<!--JedisPoolConfig 连接池参数配置-->
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="300" /><!--最大空闲实例数-->
+		<property name="maxTotal" value="600" /><!--最大活跃实例数-->
+		<property name="maxWaitMillis" value="1000" /><!--创建实例时最长等待时间-->
+		<property name="testOnBorrow" value="true" /><!--创建实例时是否验证-->
+	</bean>
+
+	<!--JedisConnectionFactory 跟配置数据库连接池类似,需要配置JedisConnectionFactory来通过服务器或者连接池的方式获取redis服务器的连接-->
+	<bean id="connectionFactory"
+		  class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="hostName" value="${redis.host}"/>
+		<property name="port" value="${redis.port}"/>
+		<property name="usePool" value="true"/>
+		<property name="poolConfig" ref="poolConfig"/>
+	</bean>
+
+	<bean id="stringRedisSerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+	<bean id="valueSerializer" class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
+
+	<!-- redis模板配置  spring-data-redis提供了一个基础的泛型RedisTemplate封装了基础的crud操作-->
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="defaultSerializer" ref="stringRedisSerializer"/>
+		<property name="keySerializer" ref="stringRedisSerializer"/>
+		<property name="valueSerializer" ref="valueSerializer"/>
+	</bean>
+
+</beans>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.BorrowMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.Borrow">
+    <id column="username" jdbcType="VARCHAR" property="username" />
+    <id column="book_no" jdbcType="VARCHAR" property="bookNo" />
+    <id column="bor_time" jdbcType="TIMESTAMP" property="borTime" />
+    <result column="ret_time" jdbcType="TIMESTAMP" property="retTime" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+    <result column="re_new" jdbcType="TINYINT" property="reNew" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    username, book_no, bor_time, ret_time, state, re_new
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="com.guet.entity.BorrowKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from borrow
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+    and DATEDIFF(day, bor_time, #{borTime,jdbcType=TIMESTAMP}) = 0
+  </select>
+
+  <select id="selectAll"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from borrow
+  </select>
+
+  <select id="selectBorrows" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from borrow
+    where ${column} not in (
+    select top ${offest} ${column}
+    from borrow
+    )
+    and (book_no like '%${keyWord}%'
+    or username like '%${keyWord}%'
+    or ret_time like '%${keyWord}%'
+    or bor_time like '%${keyWord}%'
+    or re_new like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectReaderBorrows" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from borrow
+    where ${column} not in (
+    select top ${offest} ${column}
+    from borrow
+    )
+    and username = ${username}
+    and (book_no like '%${keyWord}%'
+    or ret_time like '%${keyWord}%'
+    or bor_time like '%${keyWord}%'
+    or re_new like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectAllCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+  </select>
+
+  <select id="selectBookCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow b join book b2 on b.book_no = b2.book_no join book_info i on b2.call_num = i.call_num
+    where i.call_num = #{callNum,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAllCountReader"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where username=#{username}
+  </select>
+
+  <select id="selectCountState"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where state = #{state}
+  </select>
+
+  <select id="selectCountStateReader"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where state = #{state}
+    and username = #{username}
+  </select>
+
+  <select id="selectCountStateDate"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where state = #{state}
+    and bor_time between convert(char(10),#{startDate,jdbcType=TIMESTAMP},120)
+    and convert(char(10),#{endDate,jdbcType=TIMESTAMP},120)
+  </select>
+
+  <select id="selectReaderCountState"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where state = #{state}
+    and username = #{username}
+  </select>
+
+  <select id="selectUnReturnCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where DATEDIFF(day, getdate(),ret_time) > 0
+  </select>
+
+  <select id="selectReaderUnReturnCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from borrow
+    where username = #{username}
+    and DATEDIFF(day, getdate(),ret_time) > 0
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="com.guet.entity.BorrowKey">
+    delete from borrow
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+      and DATEDIFF (day, bor_time, #{borTime,jdbcType=TIMESTAMP}) = 0
+  </delete>
+
+  <insert id="insert" parameterType="com.guet.entity.Borrow">
+    insert into borrow (username, book_no, bor_time, 
+      ret_time, state, re_new
+      )
+    values (#{username,jdbcType=VARCHAR}, #{bookNo,jdbcType=VARCHAR}, #{borTime,jdbcType=TIMESTAMP}, 
+      #{retTime,jdbcType=TIMESTAMP}, #{state,jdbcType=TINYINT}, #{reNew,jdbcType=TINYINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.Borrow">
+    insert into borrow
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        username,
+      </if>
+      <if test="bookNo != null">
+        book_no,
+      </if>
+      <if test="borTime != null">
+        bor_time,
+      </if>
+      <if test="retTime != null">
+        ret_time,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="reNew != null">
+        re_new,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="bookNo != null">
+        #{bookNo,jdbcType=VARCHAR},
+      </if>
+      <if test="borTime != null">
+        #{borTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="retTime != null">
+        #{retTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=TINYINT},
+      </if>
+      <if test="reNew != null">
+        #{reNew,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.guet.entity.Borrow">
+    update borrow
+    <set>
+      <if test="retTime != null">
+        ret_time = #{retTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=TINYINT},
+      </if>
+      <if test="reNew != null">
+        re_new = #{reNew,jdbcType=TINYINT},
+      </if>
+    </set>
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+    and DATEDIFF (day, bor_time, #{borTime,jdbcType=TIMESTAMP}) = 0
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.guet.entity.Borrow">
+    update borrow
+    set ret_time = #{retTime,jdbcType=TIMESTAMP},
+      state = #{state,jdbcType=TINYINT},
+      re_new = #{reNew,jdbcType=TINYINT}
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+      and DATEDIFF (day, bor_time, #{borTime,jdbcType=TIMESTAMP}) = 0
+  </update>
+
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.ReserveMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.Reserve">
+    <id column="username" jdbcType="VARCHAR" property="username" />
+    <id column="book_no" jdbcType="VARCHAR" property="bookNo" />
+    <result column="res_time" jdbcType="TIMESTAMP" property="resTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    username, book_no, res_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="com.guet.entity.ReserveKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from reserve
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectReserves" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from reserve
+    where ${column} not in (
+    select top ${offest} ${column}
+    from reserve
+    )
+    and (book_no like '%${keyWord}%'
+    or username like '%${keyWord}%'
+    or res_time like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectAllCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from reserve
+  </select>
+
+  <select id="selectCountDate"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from reserve
+    where res_time between convert(char(10),#{startDate,jdbcType=TIMESTAMP},120)
+    and convert(char(10),#{endDate,jdbcType=TIMESTAMP},120)
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="com.guet.entity.ReserveKey">
+    delete from reserve
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.guet.entity.Reserve">
+    insert into reserve (username, book_no, res_time
+      )
+    values (#{username,jdbcType=VARCHAR}, #{bookNo,jdbcType=VARCHAR}, #{resTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.Reserve">
+    insert into reserve
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        username,
+      </if>
+      <if test="bookNo != null">
+        book_no,
+      </if>
+      <if test="resTime != null">
+        res_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="bookNo != null">
+        #{bookNo,jdbcType=VARCHAR},
+      </if>
+      <if test="resTime != null">
+        #{resTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.guet.entity.Reserve">
+    update reserve
+    <set>
+      <if test="resTime != null">
+        res_time = #{resTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.guet.entity.Reserve">
+    update reserve
+    set res_time = #{resTime,jdbcType=TIMESTAMP}
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+  </update>
+</mapper>

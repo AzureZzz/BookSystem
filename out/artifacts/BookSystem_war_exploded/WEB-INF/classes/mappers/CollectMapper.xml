@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.CollectMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.CollectKey">
+    <id column="username" jdbcType="VARCHAR" property="username" />
+    <id column="book_no" jdbcType="VARCHAR" property="bookNo" />
+  </resultMap>
+
+  <select id="selectAllCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from collect
+  </select>
+
+  <select id="selectCountBook"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from collect c join book b on c.book_no = b.book_no join book_info i on b.call_num = i.call_num
+    where i.call_num=#{callNum,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectReaderCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from collect
+    where username = #{username}
+  </select>
+
+  <select id="selectBooks" resultMap="BaseResultMap">
+    select top ${size}
+    *
+    from collect
+    where ${column} not in (
+    select top ${offest} ${column}
+    from collect
+    )
+    and username = ${username}
+    and (book_no like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="com.guet.entity.CollectKey">
+    delete from collect
+    where username = #{username,jdbcType=VARCHAR}
+      and book_no = #{bookNo,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.guet.entity.CollectKey">
+    insert into collect (username, book_no)
+    values (#{username,jdbcType=VARCHAR}, #{bookNo,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.CollectKey">
+    insert into collect
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        username,
+      </if>
+      <if test="bookNo != null">
+        book_no,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="bookNo != null">
+        #{bookNo,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

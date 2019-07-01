@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guet.dao.BookInfoMapper">
+  <resultMap id="BaseResultMap" type="com.guet.entity.BookInfo">
+    <id column="call_num" jdbcType="VARCHAR" property="callNum" />
+    <result column="name" jdbcType="NVARCHAR" property="name" />
+    <result column="writer" jdbcType="NVARCHAR" property="writer" />
+    <result column="isbn" jdbcType="VARCHAR" property="isbn" />
+    <result column="press" jdbcType="NVARCHAR" property="press" />
+    <result column="pub_time" jdbcType="TIMESTAMP" property="pubTime" />
+    <result column="page_num" jdbcType="INTEGER" property="pageNum" />
+    <result column="piece" jdbcType="DOUBLE" property="piece" />
+    <result column="cover" jdbcType="VARCHAR" property="cover" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.guet.entity.BookInfo">
+    <result column="digest" jdbcType="LONGVARCHAR" property="digest" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    call_num, name, writer, isbn, press, pub_time, page_num, piece, cover
+  </sql>
+  <sql id="Blob_Column_List">
+    digest
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from book_info
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAll" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from book_info
+  </select>
+
+  <select id="selectBookInfos" resultMap="ResultMapWithBLOBs">
+    select top ${size}
+    *
+    from book_info
+    where ${column} not in (
+    select top ${offest} ${column}
+    from book_info
+    )
+    and (call_num like '%${keyWord}%'
+    or isbn like '%${keyWord}%'
+    or name like '%${keyWord}%'
+    or writer like '%${keyWord}%'
+    or press like '%${keyWord}%')
+    <if test="sortDir == true">
+      order by ${column} desc
+    </if>
+    <if test="sortDir == false">
+      order by ${column} asc
+    </if>
+  </select>
+
+  <select id="selectAllCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from book_info
+  </select>
+
+  <select id="selectBookInfosCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from book_info
+    where call_num like concat('%',#{keyWord},'%')
+    or isbn like concat('%',#{keyWord},'%')
+    or name like concat('%',#{keyWord},'%')
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from book_info
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.guet.entity.BookInfo">
+    insert into book_info (call_num, name, writer, 
+      isbn, press, pub_time, 
+      page_num, piece, cover, 
+      digest)
+    values (#{callNum,jdbcType=VARCHAR}, #{name,jdbcType=NVARCHAR}, #{writer,jdbcType=NVARCHAR}, 
+      #{isbn,jdbcType=VARCHAR}, #{press,jdbcType=NVARCHAR}, #{pubTime,jdbcType=TIMESTAMP}, 
+      #{pageNum,jdbcType=INTEGER}, #{piece,jdbcType=DOUBLE}, #{cover,jdbcType=VARCHAR}, 
+      #{digest,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.guet.entity.BookInfo">
+    insert into book_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="callNum != null">
+        call_num,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="writer != null">
+        writer,
+      </if>
+      <if test="isbn != null">
+        isbn,
+      </if>
+      <if test="press != null">
+        press,
+      </if>
+      <if test="pubTime != null">
+        pub_time,
+      </if>
+      <if test="pageNum != null">
+        page_num,
+      </if>
+      <if test="piece != null">
+        piece,
+      </if>
+      <if test="cover != null">
+        cover,
+      </if>
+      <if test="digest != null">
+        digest,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="callNum != null">
+        #{callNum,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=NVARCHAR},
+      </if>
+      <if test="writer != null">
+        #{writer,jdbcType=NVARCHAR},
+      </if>
+      <if test="isbn != null">
+        #{isbn,jdbcType=VARCHAR},
+      </if>
+      <if test="press != null">
+        #{press,jdbcType=NVARCHAR},
+      </if>
+      <if test="pubTime != null">
+        #{pubTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pageNum != null">
+        #{pageNum,jdbcType=INTEGER},
+      </if>
+      <if test="piece != null">
+        #{piece,jdbcType=DOUBLE},
+      </if>
+      <if test="cover != null">
+        #{cover,jdbcType=VARCHAR},
+      </if>
+      <if test="digest != null">
+        #{digest,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.guet.entity.BookInfo">
+    update book_info
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=NVARCHAR},
+      </if>
+      <if test="writer != null">
+        writer = #{writer,jdbcType=NVARCHAR},
+      </if>
+      <if test="isbn != null">
+        isbn = #{isbn,jdbcType=VARCHAR},
+      </if>
+      <if test="press != null">
+        press = #{press,jdbcType=NVARCHAR},
+      </if>
+      <if test="pubTime != null">
+        pub_time = #{pubTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pageNum != null">
+        page_num = #{pageNum,jdbcType=INTEGER},
+      </if>
+      <if test="piece != null">
+        piece = #{piece,jdbcType=DOUBLE},
+      </if>
+      <if test="cover != null">
+        cover = #{cover,jdbcType=VARCHAR},
+      </if>
+      <if test="digest != null">
+        digest = #{digest,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.guet.entity.BookInfo">
+    update book_info
+    set name = #{name,jdbcType=NVARCHAR},
+      writer = #{writer,jdbcType=NVARCHAR},
+      isbn = #{isbn,jdbcType=VARCHAR},
+      press = #{press,jdbcType=NVARCHAR},
+      pub_time = #{pubTime,jdbcType=TIMESTAMP},
+      page_num = #{pageNum,jdbcType=INTEGER},
+      piece = #{piece,jdbcType=DOUBLE},
+      cover = #{cover,jdbcType=VARCHAR},
+      digest = #{digest,jdbcType=LONGVARCHAR}
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.guet.entity.BookInfo">
+    update book_info
+    set name = #{name,jdbcType=NVARCHAR},
+      writer = #{writer,jdbcType=NVARCHAR},
+      isbn = #{isbn,jdbcType=VARCHAR},
+      press = #{press,jdbcType=NVARCHAR},
+      pub_time = #{pubTime,jdbcType=TIMESTAMP},
+      page_num = #{pageNum,jdbcType=INTEGER},
+      piece = #{piece,jdbcType=DOUBLE},
+      cover = #{cover,jdbcType=VARCHAR}
+    where call_num = #{callNum,jdbcType=VARCHAR}
+  </update>
+</mapper>
