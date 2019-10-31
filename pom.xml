@@ -19,7 +19,7 @@
         <junit.version>4.12</junit.version>
         <mysql.version>5.1.45</mysql.version>
         <c3p0.version>0.9.5.2</c3p0.version>
-        <jackson.version>2.8.5</jackson.version>
+        <jackson.version>2.10.0</jackson.version>
         <taglibVersion>1.1.2</taglibVersion>
         <jstlVersion>1.2</jstlVersion>
     </properties>
