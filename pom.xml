@@ -16,7 +16,7 @@
         <log4j.version>1.2.17</log4j.version>
         <slf4j.version>1.7.25</slf4j.version>
         <servlet.version>4.0.0</servlet.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <mysql.version>5.1.45</mysql.version>
         <c3p0.version>0.9.5.2</c3p0.version>
         <jackson.version>2.8.5</jackson.version>
